@@ -1,0 +1,4 @@
+{
+  "payload": "{\"schema\":1,\"product\":\"Chino\",\"version\":\"1.1\",\"build\":2,\"published\":1794158064,\"expires\":1801934064,\"url\":\"https://github.com/maliklil1/chino-releases/releases/download/build-2/Chino.exe\",\"sha256\":\"7df3106472e29709c5f30bae8b2f25a9f411a2da07d63055051a1375ceaacac7\",\"size\":4657152,\"notes\":\"- Signed startup updates from GitHub Releases.\\n- Offset changes ship inside compatible app builds; unknown Roblox versions stay blocked.\\n- Changelog tab below Teams and a once-per-build announcement.\\n- Verified downloads, graceful restart and a previous-build backup.\"}",
+  "signature": "7fd64cd6929b9fb716a22835987b3892b6372e41d93f155fe0ce128cb147a65c3a9eb52c3cc7379440ea67418994bfebaff5e07d3f428d1cae707c0bc19b3c01"
+}

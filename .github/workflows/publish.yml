@@ -1,0 +1,55 @@
+name: Publish signed Chino release
+on:
+  push:
+    branches: [main]
+    paths: ['.payload/**', '.github/workflows/publish.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: chino-release-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Verify prepared package and publish release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          import hashlib, json, re, shutil, subprocess
+          payload = Path('.payload')
+          output = Path('release-assets')
+          output.mkdir()
+          package = output / 'Chino-windows-x64.zip'
+          with package.open('wb') as stream:
+              for part in sorted((payload / 'parts').glob('*.bin')):
+                  stream.write(part.read_bytes())
+          expected = (payload / 'package-sha256.txt').read_text().strip()
+          assert hashlib.sha256(package.read_bytes()).hexdigest() == expected
+          with ZipFile(package) as archive:
+              assert archive.testzip() is None
+              binary = archive.read('Chino/Chino.exe')
+              (output / 'Chino.exe').write_bytes(binary)
+          envelope = json.loads((payload / 'chino-update.json').read_text())
+          manifest = json.loads(envelope['payload'])
+          assert len(binary) == manifest['size']
+          assert hashlib.sha256(binary).hexdigest() == manifest['sha256']
+          meta = json.loads((payload / 'release-meta.json').read_text())
+          assert re.fullmatch(r'build-[0-9]+', meta['tag'])
+          assert meta['tag'] == 'build-' + str(manifest['build'])
+          shutil.copy2(payload / 'chino-update.json', output / 'chino-update.json')
+          # Publish only after all three assets exist. Never overwrite a published build.
+          found = subprocess.run(['gh', 'release', 'view', meta['tag'], '--json', 'isDraft'], capture_output=True, text=True)
+          if found.returncode == 0:
+              assert json.loads(found.stdout)['isDraft'], 'Build already published: increase the build number'
+          else:
+              subprocess.run(['gh', 'release', 'create', meta['tag'], '--draft', '--title', meta['title'], '--notes-file', str(payload / 'CHANGELOG.md')], check=True)
+          subprocess.run(['gh', 'release', 'upload', meta['tag'], str(output / 'Chino.exe'), str(package), str(output / 'chino-update.json'), '--clobber'], check=True)
+          subprocess.run(['gh', 'release', 'edit', meta['tag'], '--draft=false', '--latest'], check=True)
+          PY
+

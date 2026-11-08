@@ -1,9 +1,7 @@
 # Chino releases
 
-Official release assets and signed update metadata for Chino.
+[Download latest](https://github.com/maliklil1/chino-releases/releases/latest)
 
 Discord: m.yvl
 
-Source code, test credentials and private signing keys are not stored in this repository.
-
-Customer builds check signed GitHub Releases assets at startup. A matching published Roblox client layout is required; the updater does not invent or guess new offsets.
+This repository distributes binaries, signed update metadata and publishing automation. Source code, private signing keys and credentials are not published here. Install an updater-capable build once; subsequent signed builds download at startup. Unknown Roblox client versions remain blocked until a validated compatible build is published.
